@@ -1,20 +1,20 @@
-app CoverLetterGPT {
+app CartaDePresentacionGPT {
   wasp: {
-    version: "^0.15.0"
+    version: "^0.16.4"
   },
-  title: "CoverLetterGPT",
+  title: "CartaDePresentacionGPT",
   head: [
         "<meta charset=\"UTF-8\" />",
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />",
-        "<meta name=\"description\" content=\"Create Unique Cover Letters Based on Your Skills using GPT. Supercharge Your Job Search with Cover Letter GPT.\" />",
-        "<meta name=\"keywords\" content=\"cover letter, gpt, ai, job search, resume\" />",
-        "<meta name=\"author\" content=\"CoverLetterGPT\" />",
+        "<meta name=\"description\" content=\"Crea Cartas de Presentación Únicas Basadas en tus Habilidades usando GPT. Potencia tu Búsqueda de Trabajo con CartaDePresentacionGPT.\" />",
+        "<meta name=\"keywords\" content=\"carta de presentación, carta de recomendación, gpt, ia, búsqueda de trabajo, currículum\" />",
+        "<meta name=\"author\" content=\"CartaDePresentacionGPT\" />",
         "<meta property=\"og:type\" content=\"website\" />",
-        "<meta property=\"og:url\" content=\"https://CoverLetterGPT.xyz\" />",
-        "<meta property=\"og:title\" content=\"CoverLetterGPT\" />",
-        "<meta property=\"og:description\" content=\"Create Unique Cover Letters Based on Your Skills using GPT. Supercharge Your Job Search with Cover Letter GPT.\" />",
-        "<meta property=\"og:image\" content=\"https://CoverLetterGPT.xyz/homepage.png\" />",
-        "<meta name=\"twitter:image\" content=\"https://CoverLetterGPT.xyz/homepage.png\" />",
+        "<meta property=\"og:url\" content=\"https://CartaDePresentacionGPT.xyz\" />",
+        "<meta property=\"og:title\" content=\"CartaDePresentacionGPT\" />",
+        "<meta property=\"og:description\" content=\"Crea Cartas de Presentación Únicas Basadas en tus Habilidades usando GPT. Potencia tu Búsqueda de Trabajo con CartaDePresentacionGPT.\" />",
+        "<meta property=\"og:image\" content=\"https://CartaDePresentacionGPT.xyz/homepage.png\" />",
+        "<meta name=\"twitter:image\" content=\"https://CartaDePresentacionGPT.xyz/homepage.png\" />",
         "<meta name=\"twitter:image:width\" content=\"800\" />",
         "<meta name=\"twitter:image:height\" content=\"400\" />",
         "<meta name=\"twitter:card\" content=\"summary_large_image\" />",
@@ -37,8 +37,8 @@ app CoverLetterGPT {
   emailSender: {
     provider: SendGrid,
     defaultFrom: {
-      name: "CoverLetterGPT",
-      email: "vince@wasp-lang.dev",
+      name: "CartaDePresentacionGPT",
+      email: "", //@todo THIS.
     },
   },
 }
@@ -52,7 +52,7 @@ page MainPage {
   component: import Main from "@src/client/MainPage"
 }
 
-route CoverLetterPage { path: "/cover-letter/:id", to: CoverLetterPage }
+route CoverLetterPage { path: "/carta/:id", to: CoverLetterPage }
 page CoverLetterPage {
   authRequired: true,
   component: import CoverLetter from "@src/client/CoverLetterPage"
@@ -63,30 +63,30 @@ page LoginPage {
   component: import Login from "@src/client/LoginPage"
 }
 
-route JobsRoute { path: "/jobs", to: JobsPage }
+route JobsRoute { path: "/trabajos", to: JobsPage }
 page JobsPage {
   authRequired: true,
   component: import Jobs from "@src/client/JobsPage"
 }
 
-route ProfileRoute { path: "/profile", to: ProfilePage }
+route ProfileRoute { path: "/perfil", to: ProfilePage }
 page ProfilePage {
   authRequired: true,
   component: import Profile from "@src/client/ProfilePage"
 }
 
-route CheckoutRoute { path: "/checkout", to: CheckoutPage }
+route CheckoutRoute { path: "/pago", to: CheckoutPage }
 page CheckoutPage {
   authRequired: true,
   component: import Checkout from "@src/client/CheckoutPage"
 }
 
-route TosRoute { path: "/tos", to: TosPage }
+route TosRoute { path: "/terminos", to: TosPage }
 page TosPage {
   component: import Tos from "@src/client/legal/TosPage"
 } 
 
-route PrivacyRoute { path: "/privacy", to: PrivacyPage }
+route PrivacyRoute { path: "/privacidad", to: PrivacyPage }
 page PrivacyPage {
   component: import Privacy from "@src/client/legal/PrivacyPolicyPage"
 }

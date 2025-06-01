@@ -17,6 +17,17 @@
     "esModuleInterop": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["src/*"]
+    },
     "typeRoots": [
       // This is needed to properly support Vitest testing with jest-dom matchers.
       // Types for jest-dom are not recognized automatically and Typescript complains
@@ -32,6 +43,10 @@
     // compilation, the following directory doesn't exist. We need to specify
     // it to prevent this error:
     // https://stackoverflow.com/questions/42609768/typescript-error-cannot-write-file-because-it-would-overwrite-input-file
-    "outDir": ".wasp/phantom"
-  }
+    "outDir": ".wasp/out/user",
+    "composite": true
+  },
+  "include": [
+    "src"
+  ]
 }

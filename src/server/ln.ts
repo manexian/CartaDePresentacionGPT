@@ -220,23 +220,35 @@ export const updateLnPayment: UpdateLnPayment<LightningInvoice, LnPayment> = asy
   return updatedInvoice;
 };
 
-const getBitcoinPrice = async () => {
-  let response = null;
+interface CoinMarketCapResponse {
+  data: Array<{
+    quote: {
+      USD: {
+        price: number;
+      };
+    };
+  }>;
+}
 
+const getBitcoinPrice = async () => {
   try {
-    response = await axios.get('https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest', {
+    const response = await axios.get<CoinMarketCapResponse>('https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest', {
       headers: {
         'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY!,
       },
     });
+    
+    if (!response?.data?.data?.[0]?.quote?.USD?.price) {
+      console.log('Invalid response format from CoinMarketCap API');
+      return null;
+    }
+    
+    const price = response.data.data[0].quote.USD.price;
+    console.log(price);
+    return price;
   } catch (error: any) {
     console.log('error calling coinmarket cap api: ', error.message);
     return null;
-  }
-  if (response) {
-    const json = response.data.data[0].quote.USD.price;
-    console.log(json);
-    return json;
   }
 };
 

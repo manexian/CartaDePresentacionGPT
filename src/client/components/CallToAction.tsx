@@ -24,14 +24,14 @@ export function Footer() {
             </Text>
           </HStack>
         </Link>
-        <WaspLink to='/tos'>
+        <WaspLink to='/terminos'>
           <Text fontSize='sm' color='purple.300'>
-            Terms of Service
+            Términos de Servicio
           </Text>
         </WaspLink>
-        <WaspLink to='/privacy'>
+        <WaspLink to='/privacidad'>
           <Text fontSize='sm' color='purple.300'>
-            Privacy Policy
+            Política de Privacidad
           </Text>
         </WaspLink>
       </VStack>

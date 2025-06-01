@@ -1,5 +1,6 @@
 import { type User, type LnPayment } from "wasp/entities";
 import { useAuth } from "wasp/client/auth";
+import { translations } from './translations';
 
 import {
   generateCoverLetter,
@@ -164,7 +165,7 @@ function MainPage() {
           clearErrors('pdf');
         })
         .catch((err) => {
-          alert('An Error occured uploading your PDF. Please try again.');
+          alert(translations.pdfUploadError);
           console.error(err);
         });
     };
@@ -172,7 +173,7 @@ function MainPage() {
     try {
       fileReader.readAsArrayBuffer(pdfFile);
     } catch (error) {
-      alert('An Error occured uploading your PDF. Please try again.');
+      alert(translations.pdfUploadError);
     }
   }
 
@@ -256,7 +257,7 @@ function MainPage() {
       navigate(`/cover-letter/${coverLetter.id}`);
     } catch (error: any) {
       cancelLoadingText();
-      alert(`${error?.message ?? 'Something went wrong, please try again'}`);
+      alert(`${error?.message ?? translations.genericError}`);
       console.error(error);
     }
   }
@@ -301,7 +302,7 @@ function MainPage() {
       navigate(`/cover-letter/${coverLetterId}`);
     } catch (error: any) {
       cancelLoadingText();
-      alert(`${error?.message ?? 'Something went wrong, please try again'}`);
+      alert(`${error?.message ?? translations.genericError}`);
       console.error(error);
     }
   }
@@ -365,17 +366,16 @@ function MainPage() {
         _hover={{ bgColor: 'bg-contrast-xs' }}
         transition='0.1s ease-in-out'
       >
-        <Text fontSize='md'>{coverLetterCount?.toLocaleString()} Cover Letters Generated! 🎉</Text>
+        <Text fontSize='md'>{translations.coverLettersGenerated.replace('{{count}}', coverLetterCount?.toLocaleString() || '0')}</Text>
       </Box>
       <BorderBox>
         <form
           onSubmit={!isCoverLetterUpdate ? handleSubmit(onSubmit) : handleSubmit(onUpdate)}
           style={{ width: '100%' }}
         >
-
-            <Heading size={'md'} alignSelf={'start'} mb={3} w='full'>
-              Job Info {isCoverLetterUpdate && <Code ml={1}>Editing...</Code>}
-            </Heading>
+          <Heading size={'md'} alignSelf={'start'} mb={3} w='full'>
+            {translations.jobInfo} {isCoverLetterUpdate && <Code ml={1}>{translations.editing}</Code>}
+          </Heading>
 
           {showSpinner && <Spinner />}
           {showForm && (
@@ -385,12 +385,12 @@ function MainPage() {
                   id='title'
                   borderRadius={0}
                   borderTopRadius={7}
-                  placeholder='job title'
+                  placeholder={translations.jobTitle}
                   {...register('title', {
-                    required: 'This is required',
+                    required: translations.required,
                     minLength: {
                       value: 2,
-                      message: 'Minimum length should be 2',
+                      message: translations.minLength.replace('{{length}}', '2'),
                     },
                   })}
                   onFocus={(e: any) => {
@@ -407,12 +407,12 @@ function MainPage() {
                 <Input
                   id='company'
                   borderRadius={0}
-                  placeholder='company'
+                  placeholder={translations.company}
                   {...register('company', {
-                    required: 'This is required',
+                    required: translations.required,
                     minLength: {
                       value: 1,
-                      message: 'Minimum length should be 1',
+                      message: translations.minLength.replace('{{length}}', '1'),
                     },
                   })}
                   disabled={isCoverLetterUpdate}
@@ -423,12 +423,12 @@ function MainPage() {
                 <Input
                   id='location'
                   borderRadius={0}
-                  placeholder='location'
+                  placeholder={translations.location}
                   {...register('location', {
-                    required: 'This is required',
+                    required: translations.required,
                     minLength: {
                       value: 2,
-                      message: 'Minimum length should be 2',
+                      message: translations.minLength.replace('{{length}}', '2'),
                     },
                   })}
                   disabled={isCoverLetterUpdate}
@@ -439,9 +439,9 @@ function MainPage() {
                 <Textarea
                   id='description'
                   borderRadius={0}
-                  placeholder='copy & paste the job description in any language'
+                  placeholder={translations.description}
                   {...register('description', {
-                    required: 'This is required',
+                    required: translations.required,
                   })}
                 />
                 <FormErrorMessage>
@@ -455,7 +455,7 @@ function MainPage() {
                   accept='application/pdf'
                   placeholder='pdf'
                   {...register('pdf', {
-                    required: 'Please upload a CV/Resume',
+                    required: translations.required,
                   })}
                   onChange={(e) => {
                     onFileUpload(e);
@@ -480,14 +480,14 @@ function MainPage() {
                   <HStack>
                     <FormLabel textAlign='center' htmlFor='pdf'>
                       <Button size='sm' colorScheme='contrast' onClick={handleFileButtonClick}>
-                        Upload CV
+                        {translations.uploadCV}
                       </Button>
                     </FormLabel>
-                    {isPdfReady && <Text fontSize={'sm'}>👍 uploaded</Text>}
+                    {isPdfReady && <Text fontSize={'sm'}>{translations.uploadedSuccess}</Text>}
                     <FormErrorMessage>{!!formErrors.pdf && formErrors.pdf.message?.toString()}</FormErrorMessage>
                   </HStack>
                   <FormHelperText mt={0.5} fontSize={'xs'}>
-                    Upload a PDF only of Your CV/Resumé
+                    {translations.uploadPDFOnly}
                   </FormHelperText>
                 </VStack>
               </FormControl>
@@ -515,10 +515,10 @@ function MainPage() {
                     >
                       <HStack spacing={5}>
                         <Radio {...register('gptModel')} value='gpt-4o-mini'>
-                          GPT 4o mini
+                          {translations.gptModelMini}
                         </Radio>
                         <Radio {...register('gptModel')} value='gpt-4o'>
-                          GPT 4o
+                          {translations.gptModelFull}
                         </Radio>
                       </HStack>
                     </RadioGroup>
@@ -571,7 +571,7 @@ function MainPage() {
                       color: 'text-contrast-lg',
                     }}
                   >
-                    cover letter creativity level
+                    {translations.creativityLevel}
                   </FormLabel>
                 </FormControl>
               </VStack>
@@ -602,35 +602,34 @@ function MainPage() {
                       color: 'text-contrast-lg',
                     }}
                   >
-                    include a witty remark at the end of the letter
+                    {translations.wittyRemarkLabel}
                   </FormLabel>
                 </FormControl>
               </VStack>
-              <HStack alignItems='flex-end' gap={1}>
-                <Button
-                  colorScheme='purple'
-                  mt={3}
-                  size='sm'
-                  isLoading={isSubmitting}
-                  disabled={user === null}
-                  type='submit'
-                >
-                  {!isCoverLetterUpdate ? 'Generate Cover Letter' : 'Create New Cover Letter'}
-                </Button>
-                <Text ref={loadingTextRef} fontSize='sm' fontStyle='italic' color='text-contrast-md'>
-                  {' '}
-                </Text>
-              </HStack>
+              <Button
+                mt={4}
+                colorScheme="teal"
+                isLoading={isSubmitting}
+                type="submit"
+                width="100%"
+              >
+                {isCoverLetterUpdate ? translations.createNewButton : translations.generateButton}
+              </Button>
             </>
           )}
           {showJobNotFound && (
             <>
               <Text fontSize='sm' color='text-contrast-md'>
-                Can't find that job...
+                {translations.jobNotFound}
               </Text>
             </>
           )}
         </form>
+        {isSubmitting && (
+          <Text textAlign="center" ref={loadingTextRef}>
+            {translations.patience}
+          </Text>
+        )}
       </BorderBox>
       <LeaveATip
         isOpen={isOpen}

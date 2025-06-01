@@ -7,6 +7,7 @@ import { useContext } from 'react';
 import { TextareaContext } from './App';
 import { EditAlert } from './components/AlertDialog';
 import { useEffect, useState } from 'react';
+import { translations } from './translations';
 
 export default function CoverLetterPage() {
   const { textareaState, setTextareaState } = useContext(TextareaContext);
@@ -15,7 +16,7 @@ export default function CoverLetterPage() {
 
   const { id } = useParams();
   if (!id) {
-    return <BorderBox>Error: Cover letter ID is required</BorderBox>;
+    return <BorderBox>{translations.coverLetterIdRequired}</BorderBox>;
   }
 
   const {
@@ -41,7 +42,7 @@ export default function CoverLetterPage() {
     try {
       setEditIsLoading(true);
       if (!id) {
-        throw new Error('Cover letter ID is required');
+        throw new Error(translations.coverLetterIdRequired);
       }
 
       const editedCoverLetter = await editCoverLetter({ coverLetterId: id, content: textareaState });
@@ -54,7 +55,7 @@ export default function CoverLetterPage() {
       }
     } catch (error) {
       console.error(error);
-      alert('An error occured. Please try again.');
+      alert(translations.genericError);
     }
     setEditIsLoading(false);
   };
@@ -82,7 +83,7 @@ export default function CoverLetterPage() {
         {coverLetter && (
           <HStack>
             <Tooltip
-              label={isEdited && 'Changes Saved!'}
+              label={isEdited && translations.changesSaved}
               placement='top'
               hasArrow
               isOpen={isEdited}
@@ -90,17 +91,17 @@ export default function CoverLetterPage() {
               closeOnClick={true}
             >
               <Button size='sm' mr={3} onClick={handleClick} isDisabled={false} isLoading={editIsLoading}>
-                Save Changes
+                {translations.saveChanges}
               </Button>
             </Tooltip>
             <Tooltip
-              label={hasCopied ? 'Copied!' : 'Copy Letter to Clipboard'}
+              label={hasCopied ? translations.copied : translations.copyToClipboard}
               placement='top'
               hasArrow
               closeOnClick={false}
             >
               <Button colorScheme='purple' size='sm' mr={3} onClick={onCopy}>
-                Copy
+                {translations.copy}
               </Button>
             </Tooltip>
           </HStack>

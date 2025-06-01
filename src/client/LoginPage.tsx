@@ -7,6 +7,7 @@ import BorderBox from './components/BorderBox';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LnLoginModal from './components/LnLoginModal';
+import { translations } from './translations';
 
 export default function Login() {
   const [encodedUrl, setEncodedUrl] = useState<string | null>(null);
@@ -64,7 +65,7 @@ export default function Login() {
       if (!lnUserInfo?.token || !user) {
         clearInterval(interval);
         setLnIsLoading(false);
-        alert('Login timed out. Please try again.');
+        alert(translations.loginTimeout);
       }
     }, 60000);
   };
@@ -77,11 +78,10 @@ export default function Login() {
         ) : (
           <VStack>
             <a href={signInUrl}>
-              <Button leftIcon={<AiOutlineGoogle />}>Google Sign In</Button>
+              <Button leftIcon={<AiOutlineGoogle />}>{translations.googleSignIn}</Button>
             </a>
             <Button isLoading={lnIsLoading} onClick={handleWalletClick} leftIcon={<BsCurrencyBitcoin />}>
-              {' '}
-              Lightning Sign In
+              {translations.lightningSignIn}
             </Button>
           </VStack>
         )}

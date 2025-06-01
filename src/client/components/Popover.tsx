@@ -27,20 +27,19 @@ export function EditPopover({ setTooltip, selectedText, user, ...props }: EditPo
     try {
       if (user.isUsingLn && user.credits === 0) {
         const invoice = await fetchLightningInvoice();
-        let lnPayment: LnPayment;
-        if (invoice) {
-          invoice.status = 'pending';
-          lnPayment = await updateLnPayment(invoice);
-          setLightningInvoice(invoice);
-          lnPaymentOnOpen();
-        } else {
+        if (!invoice) {
           throw new Error('fetching lightning invoice failed');
         }
 
+        invoice.status = 'pending';
+        const lnPayment = await updateLnPayment(invoice);
+        setLightningInvoice(invoice);
+        lnPaymentOnOpen();
+
         let status = invoice.status;
         while (status === 'pending') {
-          lnPayment = await updateLnPayment(invoice);
-          status = lnPayment.status;
+          const updatedPayment = await updateLnPayment(invoice);
+          status = updatedPayment.status;
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
         if (status !== 'success') {
@@ -48,15 +47,16 @@ export function EditPopover({ setTooltip, selectedText, user, ...props }: EditPo
         }
         return lnPayment;
       }
+      return null;
     } catch (error) {
       console.error('Error processing payment, please try again');
       return null;
     }
   }
 
-  const replaceSelectedText = async ({ improvement, lnPayment }: { improvement: string, lnPayment: LnPayment }) => {
+  const replaceSelectedText = async ({ improvement, lnPayment }: { improvement: string, lnPayment: LnPayment | null }) => {
     const selection = window.getSelection();
-    let loadingInterval;
+    let loadingInterval: NodeJS.Timeout | undefined;
 
     try {
       const value = textareaState;
@@ -79,7 +79,11 @@ export function EditPopover({ setTooltip, selectedText, user, ...props }: EditPo
         }
       }, 750);
 
-      const newValue = await generateEdit({ content: selectString, improvement, lnPayment });
+      const payload = { content: selectString, improvement };
+      if (lnPayment) {
+        Object.assign(payload, { lnPayment });
+      }
+      const newValue = await generateEdit(payload);
 
       clearInterval(loadingInterval);
       setTextareaState(value);
@@ -94,7 +98,7 @@ export function EditPopover({ setTooltip, selectedText, user, ...props }: EditPo
       setTextareaState(newText);
     } catch (error: any) {
       console.error(error);
-      clearInterval(loadingInterval);
+      if (loadingInterval) clearInterval(loadingInterval);
       alert(error?.message ?? 'An error has occurred');
     }
   };
@@ -106,7 +110,8 @@ export function EditPopover({ setTooltip, selectedText, user, ...props }: EditPo
       window.getSelection()?.removeAllRanges();
       return;
     }
-    let lnPayment: LnPayment | undefined;
+
+    let lnPayment: LnPayment | null = null;
     if (userInfo?.isUsingLn) {
       if (userInfo.credits > 0) {
         onPayOpen();
