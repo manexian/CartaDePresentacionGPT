@@ -52,7 +52,7 @@ page MainPage {
   component: import Main from "@src/client/MainPage"
 }
 
-route CoverLetterPage { path: "/carta/:id", to: CoverLetterPage }
+route CoverLetterPage { path: "/cover-letter/:id", to: CoverLetterPage }
 page CoverLetterPage {
   authRequired: true,
   component: import CoverLetter from "@src/client/CoverLetterPage"
@@ -63,30 +63,30 @@ page LoginPage {
   component: import Login from "@src/client/LoginPage"
 }
 
-route JobsRoute { path: "/trabajos", to: JobsPage }
+route JobsRoute { path: "/jobs", to: JobsPage }
 page JobsPage {
   authRequired: true,
   component: import Jobs from "@src/client/JobsPage"
 }
 
-route ProfileRoute { path: "/perfil", to: ProfilePage }
+route ProfileRoute { path: "/profile", to: ProfilePage }
 page ProfilePage {
   authRequired: true,
   component: import Profile from "@src/client/ProfilePage"
 }
 
-route CheckoutRoute { path: "/pago", to: CheckoutPage }
+route CheckoutRoute { path: "/checkout", to: CheckoutPage }
 page CheckoutPage {
   authRequired: true,
   component: import Checkout from "@src/client/CheckoutPage"
 }
 
-route TosRoute { path: "/terminos", to: TosPage }
+route TosRoute { path: "/tos", to: TosPage }
 page TosPage {
   component: import Tos from "@src/client/legal/TosPage"
 } 
 
-route PrivacyRoute { path: "/privacidad", to: PrivacyPage }
+route PrivacyRoute { path: "/privacy", to: PrivacyPage }
 page PrivacyPage {
   component: import Privacy from "@src/client/legal/PrivacyPolicyPage"
 }

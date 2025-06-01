@@ -606,15 +606,19 @@ function MainPage() {
                   </FormLabel>
                 </FormControl>
               </VStack>
+              <HStack alignItems="flex-end" gap={1}>
               <Button
                 mt={4}
-                colorScheme="teal"
+                colorScheme="purple"
                 isLoading={isSubmitting}
+                disabled={user === null}
                 type="submit"
                 width="100%"
               >
                 {isCoverLetterUpdate ? translations.createNewButton : translations.generateButton}
               </Button>
+              <Text ref={loadingTextRef} fontSize="sm" fontStyle="italic" color="text-contrast-md">{' '}</Text>
+              </HStack>
             </>
           )}
           {showJobNotFound && (
@@ -625,11 +629,6 @@ function MainPage() {
             </>
           )}
         </form>
-        {isSubmitting && (
-          <Text textAlign="center" ref={loadingTextRef}>
-            {translations.patience}
-          </Text>
-        )}
       </BorderBox>
       <LeaveATip
         isOpen={isOpen}

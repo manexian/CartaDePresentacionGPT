@@ -11,11 +11,11 @@ export function Footer() {
           <HStack justify='center'>
             <FaGithub />
             <Text fontSize='sm' color='purple.300'>
-              Built with Wasp & 100% Open-Source
+              Hecho con Wasp y 100% de código abierto. Gracias @vincanger :heart:
             </Text>
           </HStack>
         </Link>
-
+/*
         <Link href='https://twitter.com/hot_town' target='_blank' color='purple.300'>
           <HStack justify='center'>
             <FaTwitter />
@@ -24,12 +24,13 @@ export function Footer() {
             </Text>
           </HStack>
         </Link>
-        <WaspLink to='/terminos'>
+        */
+        <WaspLink to='/tos'>
           <Text fontSize='sm' color='purple.300'>
             Términos de Servicio
           </Text>
         </WaspLink>
-        <WaspLink to='/privacidad'>
+        <WaspLink to='/privacy'>
           <Text fontSize='sm' color='purple.300'>
             Política de Privacidad
           </Text>
