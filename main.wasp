@@ -149,7 +149,7 @@ action stripeGpt4Payment {
 
 action stripeCreditsPayment {
   fn: import { stripeCreditsPayment } from "@src/server/actions.js",
-  entities: [User]
+  entities: [User] 
 }
 
 action getLnLoginUrl {
