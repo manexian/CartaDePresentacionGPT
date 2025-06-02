@@ -1,4 +1,4 @@
-import { type Job, type CoverLetter, type User, type LnPayment } from "wasp/entities";
+import { type Job, type CoverLetter, type User } from "wasp/entities";
 import { HttpError } from "wasp/server";
 import {
   type GenerateCoverLetter,
@@ -45,7 +45,6 @@ type CoverLetterPayload = Pick<CoverLetter, 'title' | 'jobId'> & {
   includeWittyRemark: boolean;
   temperature: number;
   gptModel: string;
-  lnPayment?: LnPayment;
 };
 
 type OpenAIResponse = {
@@ -72,38 +71,23 @@ type OpenAIResponse = {
   };
 };
 
-async function checkIfUserPaid({ context, lnPayment }: { context: any; lnPayment?: LnPayment }) {
-  if (!context.user.hasPaid && !context.user.credits && !context.user.isUsingLn) {
+async function checkIfUserPaid({ context }: { context: any }) {
+  if (!context.user.hasPaid && !context.user.credits) {
     throw new HttpError(402, 'User must pay to continue');
   }
   if (context.user.subscriptionStatus === 'past_due') {
     throw new HttpError(402, 'Your subscription is past due. Please update your payment method.');
   }
-  if (context.user.isUsingLn) {
-    let invoiceStatus;
-    if (lnPayment) {
-      const lnPaymentInDB = await context.entities.LnPayment.findUnique({
-        where: {
-          pr: lnPayment.pr,
-        },
-      });
-      invoiceStatus = lnPaymentInDB?.status;
-    }
-    console.table({ lnPayment, invoiceStatus });
-    if (invoiceStatus !== 'success') {
-      throw new HttpError(402, 'Your lightning payment has not been paid');
-    }
-  }
 }
 
 export const generateCoverLetter: GenerateCoverLetter<CoverLetterPayload, CoverLetter> = async (
-  { jobId, title, content, description, isCompleteCoverLetter, includeWittyRemark, temperature, gptModel, lnPayment },
+  { jobId, title, content, description, isCompleteCoverLetter, includeWittyRemark, temperature, gptModel },
   context
 ) => {
   if (!context.user) {
     throw new HttpError(401);
   }
-  await checkIfUserPaid({ context, lnPayment })
+  await checkIfUserPaid({ context })
 
   let command;
   if (isCompleteCoverLetter) {
@@ -132,7 +116,7 @@ export const generateCoverLetter: GenerateCoverLetter<CoverLetterPayload, CoverL
   let json: OpenAIResponse;
 
   try {
-    if (!context.user.hasPaid && !context.user.credits && !context.user.isUsingLn) {
+    if (!context.user.hasPaid && !context.user.credits) {
       throw new HttpError(402, 'User has not paid or is out of credits');
     } else if (context.user.credits && !context.user.hasPaid) {
       console.log('decrementing credits \n\n');
@@ -185,13 +169,13 @@ export const generateCoverLetter: GenerateCoverLetter<CoverLetterPayload, CoverL
 };
 
 export const generateEdit: GenerateEdit<
-  { content: string; improvement: string; lnPayment?: LnPayment },
+  { content: string; improvement: string },
   string
-> = async ({ content, improvement, lnPayment }, context) => {
+> = async ({ content, improvement }, context) => {
   if (!context.user) {
     throw new HttpError(401);
   }
-  await checkIfUserPaid({ context, lnPayment });
+  await checkIfUserPaid({ context });
 
   let command;
   command = `You are a cover letter editor. You will be given a piece of isolated text from within a cover letter and told how you can improve it. Only respond with the revision. Make sure the revision is in the same language as the given isolated text.`;
@@ -214,7 +198,7 @@ export const generateEdit: GenerateEdit<
   let json: OpenAIResponse;
 
   try {
-    if (!context.user.hasPaid && !context.user.credits && !context.user.isUsingLn) {
+    if (!context.user.hasPaid && !context.user.credits) {
       throw new HttpError(402, 'User has not paid or is out of credits');
     } else if (context.user.credits && !context.user.hasPaid) {
       console.log('decrementing credits \n\n');
@@ -307,17 +291,16 @@ export type UpdateCoverLetterPayload = Pick<Job, 'id' | 'description'> &
     includeWittyRemark: boolean;
     temperature: number;
     gptModel: string;
-    lnPayment?: LnPayment;
   };
 
 export const updateCoverLetter: UpdateCoverLetter<UpdateCoverLetterPayload, string> = async (
-  { id, description, content, isCompleteCoverLetter, includeWittyRemark, temperature, gptModel, lnPayment },
+  { id, description, content, isCompleteCoverLetter, includeWittyRemark, temperature, gptModel },
   context
 ) => {
   if (!context.user) {
     throw new HttpError(401);
   }
-  await checkIfUserPaid({ context, lnPayment });
+  await checkIfUserPaid({ context })
 
   const job = await context.entities.Job.findFirst({
     where: {
@@ -340,7 +323,6 @@ export const updateCoverLetter: UpdateCoverLetter<UpdateCoverLetterPayload, stri
       includeWittyRemark,
       temperature,
       gptModel,
-      lnPayment,
     },
     context
   );
@@ -422,7 +404,6 @@ export const updateUser: UpdateUser<UpdateUserArgs, UserWithoutPassword> = async
       stripeId: true,
       credits: true,
       gptModel: true,
-      isUsingLn: true,
       subscriptionStatus: true,
     },
   });

@@ -1,4 +1,4 @@
-import { extendTheme } from '@chakra-ui/react';
+Pimport { extendTheme } from '@chakra-ui/react';
 import { StyleFunctionProps } from '@chakra-ui/theme-tools';
 import { textStyles, fonts } from './text';
 import { semanticTokens } from './tokens';

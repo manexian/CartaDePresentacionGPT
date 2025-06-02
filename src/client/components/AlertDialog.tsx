@@ -1,4 +1,4 @@
-import { deleteJob, milliSatsToCents } from "wasp/client/operations";
+import { deleteJob } from "wasp/client/operations";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -21,73 +21,48 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { AiOutlineLogin } from 'react-icons/ai';
 import { BiTrash } from 'react-icons/bi';
+import { translations } from '../translations';
 
-export function LeaveATip({
-  isOpen,
-  onClose,
-  credits,
-  isUsingLn,
-}: {
-  isUsingLn: boolean;
-  credits: number;
+interface LeaveATipProps {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
-}) {
-  const [isLoading, setIsLoading] = useState(false);
+  credits: number;
+}
+
+export function LeaveATip({ isOpen, onOpen, onClose, credits }: LeaveATipProps) {
+  const navigate = useNavigate();
   const tipRef = useRef(null);
 
-  const navigate = useNavigate();
-  const handleClick = async () => {
-    navigate('/profile');
-    onClose();
-  };
-
   return (
-    <>
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={tipRef} onClose={onClose}>
-        <AlertDialogOverlay backdropFilter='auto' backdropInvert='15%' backdropBlur='2px'>
-          <AlertDialogContent bgColor='bg-modal'>
-            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
-              👋 Thanks for trying CoverLetterGPT.
-            </AlertDialogHeader>
+    <AlertDialog isOpen={isOpen} leastDestructiveRef={tipRef} onClose={onClose}>
+      <AlertDialogOverlay backdropFilter='auto' backdropInvert='15%' backdropBlur='2px'>
+        <AlertDialogContent bgColor='bg-modal'>
+          <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+            👋 Thanks for trying CoverLetterGPT.
+          </AlertDialogHeader>
 
-            <AlertDialogBody textAlign='center'>
-              <Text>
-                You have <Code>{credits}</Code> free cover letter {credits === 1 ? 'credit' : 'credits'} left.
-              </Text>
-              <Text mt={4}>
-                {!isUsingLn ? (
-                  <>
-                    Purchase unlimited access for only <Code>$2.95</Code> per month!
-                  </>
-                ) : (
-                  <>After, just pay a small fee per cover letter with your lightning ⚡️ wallet. </>
-                )}
-              </Text>
-            </AlertDialogBody>
+          <AlertDialogBody textAlign='center'>
+            <Text>
+              You have <Code>{credits}</Code> free cover letter {credits === 1 ? 'credit' : 'credits'} left.
+            </Text>
+            <Text mt={4}>
+              Purchase unlimited access for only <Code>$2.95</Code> per month!
+            </Text>
+          </AlertDialogBody>
 
-            <AlertDialogFooter>
-              {!isUsingLn ? (
-                <>
-                  <Button isLoading={isLoading} ref={tipRef} colorScheme='purple' onClick={handleClick}>
-                    💰 Buy More
-                  </Button>
-                  <Spacer />
-                  <Button alignSelf='flex-end' fontSize='sm' variant='solid' size='sm' onClick={onClose}>
-                    No, Thanks
-                  </Button>
-                </>
-              ) : (
-                <Button alignSelf='flex-end' fontSize='sm' variant='solid' size='sm' onClick={onClose}>
-                  OK
-                </Button>
-              )}
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </>
+          <AlertDialogFooter>
+            <Button ref={tipRef} colorScheme='purple' onClick={() => navigate('/profile')}>
+              💰 Buy More
+            </Button>
+            <Spacer />
+            <Button alignSelf='flex-end' fontSize='sm' variant='solid' size='sm' onClick={onClose}>
+              No, Thanks
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialogOverlay>
+    </AlertDialog>
   );
 }
 

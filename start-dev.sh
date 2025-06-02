@@ -12,9 +12,10 @@ set -e
 # cd /path/to/your/project
 
 # Check if we want to do a clean set up.
-argument="$1"
+#argument="$1"
 
-if ["$argument" == "clean"] then
+#if ["$argument" == "clean"] 
+#then
 print_status "Cleaning up previous build artifacts..."
 rm -rf .wasp node_modules
 
@@ -23,12 +24,11 @@ npm install
 
 print_status "Cleaning Wasp..."
 wasp clean
-else
-
+#else
 
 print_status "Starting Wasp database..."
 wasp db migrate-dev
 
 print_status "Starting Wasp development server..."
 wasp start 
-fi
+#fi

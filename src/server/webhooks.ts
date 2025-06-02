@@ -173,3 +173,85 @@ export const stripeWebhook: StripeWebhook = async (request, response, context) =
   // Return a 200 response to acknowledge receipt of the event
   response.json({ received: true });
 };
+
+export const stripeGpt4Webhook: StripeWebhook = async (request, response, context) => {
+  let event: Stripe.Event = request.body;
+  let userStripeId: string | null = null;
+  const session = event.data.object as Stripe.Checkout.Session;
+  userStripeId = session.customer as string;
+
+  try {
+    if (event.type === 'checkout.session.completed') {
+      const { line_items } = await stripe.checkout.sessions.retrieve(session.id, {
+        expand: ['line_items.data.price'],
+      });
+
+      if (line_items?.data[0]?.price?.id === process.env.GPT4_PRICE_ID) {
+        console.log('GPT4o Subscription purchased');
+        await context.entities.User.updateMany({
+          where: {
+            stripeId: userStripeId,
+          },
+          data: {
+            hasPaid: true,
+            gptModel: 'gpt-4o',
+            datePaid: new Date(),
+          },
+        });
+      }
+    } else if (event.type === 'customer.subscription.updated') {
+      const subscription = event.data.object as Stripe.Subscription;
+      userStripeId = subscription.customer as string;
+
+      if (subscription.status === 'active') {
+        await context.entities.User.updateMany({
+          where: { stripeId: userStripeId },
+          data: { subscriptionStatus: 'active' },
+        });
+      } else if (subscription.status === 'past_due') {
+        await context.entities.User.updateMany({
+          where: { stripeId: userStripeId },
+          data: { subscriptionStatus: 'past_due' },
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error in GPT4 webhook:', error);
+  }
+
+  response.json({ received: true });
+};
+
+export const stripeCreditsWebhook: StripeWebhook = async (request, response, context) => {
+  let event: Stripe.Event = request.body;
+  let userStripeId: string | null = null;
+  const session = event.data.object as Stripe.Checkout.Session;
+  userStripeId = session.customer as string;
+
+  try {
+    if (event.type === 'checkout.session.completed') {
+      const { line_items } = await stripe.checkout.sessions.retrieve(session.id, {
+        expand: ['line_items.data.price'],
+      });
+
+      if (line_items?.data[0]?.price?.id === process.env.PRODUCT_CREDITS_PRICE_ID) {
+        console.log('Credits purchased');
+        await context.entities.User.updateMany({
+          where: {
+            stripeId: userStripeId,
+          },
+          data: {
+            credits: {
+              increment: 10,
+            },
+            gptModel: 'gpt-4o-mini',
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error in credits webhook:', error);
+  }
+
+  response.json({ received: true });
+};

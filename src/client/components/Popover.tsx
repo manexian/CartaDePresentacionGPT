@@ -1,12 +1,12 @@
-import { type User, type LnPayment } from "wasp/entities";
-import { generateEdit, updateLnPayment, useQuery, getUserInfo } from "wasp/client/operations";
+import { type User} from "wasp/entities";
+import { generateEdit, useQuery, getUserInfo } from "wasp/client/operations";
 import { VStack, ButtonGroup, Button, ButtonGroupProps, Text, Box, useDisclosure } from '@chakra-ui/react';
 import { useContext, useState } from 'react';
 import { TextareaContext } from '../App';
 import { LeaveATip } from './AlertDialog';
-import LnPaymentModal from './LnPaymentModal';
-import { fetchLightningInvoice } from '../lightningUtils';
-import type { LightningInvoice } from '../lightningUtils';
+//import LnPaymentModal from './LnPaymentModal';
+//import { fetchLightningInvoice } from '../lightningUtils';
+//import type { LightningInvoice } from '../lightningUtils';
 
 interface EditPopoverProps extends ButtonGroupProps {
   selectedText?: string;
@@ -15,46 +15,11 @@ interface EditPopoverProps extends ButtonGroupProps {
 }
 
 export function EditPopover({ setTooltip, selectedText, user, ...props }: EditPopoverProps) {
-  const [lightningInvoice, setLightningInvoice] = useState<LightningInvoice | null>(null);
-  const { textareaState, setTextareaState, setIsLnPayPending } = useContext(TextareaContext);
-
+  const { textareaState, setTextareaState } = useContext(TextareaContext);
   const { data: userInfo } = useQuery(getUserInfo, { id: user.id });
-
   const { isOpen: isPayOpen, onOpen: onPayOpen, onClose: onPayClose } = useDisclosure();
-  const { isOpen: lnPaymentIsOpen, onOpen: lnPaymentOnOpen, onClose: lnPaymentOnClose } = useDisclosure();
 
-  async function checkIfLnAndPay(user: Omit<User, 'password'>): Promise<LnPayment | null> {
-    try {
-      if (user.isUsingLn && user.credits === 0) {
-        const invoice = await fetchLightningInvoice();
-        if (!invoice) {
-          throw new Error('fetching lightning invoice failed');
-        }
-
-        invoice.status = 'pending';
-        const lnPayment = await updateLnPayment(invoice);
-        setLightningInvoice(invoice);
-        lnPaymentOnOpen();
-
-        let status = invoice.status;
-        while (status === 'pending') {
-          const updatedPayment = await updateLnPayment(invoice);
-          status = updatedPayment.status;
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-        if (status !== 'success') {
-          throw new Error('payment failed');
-        }
-        return lnPayment;
-      }
-      return null;
-    } catch (error) {
-      console.error('Error processing payment, please try again');
-      return null;
-    }
-  }
-
-  const replaceSelectedText = async ({ improvement, lnPayment }: { improvement: string, lnPayment: LnPayment | null }) => {
+  const replaceSelectedText = async ({ improvement }: { improvement: string }) => {
     const selection = window.getSelection();
     let loadingInterval: NodeJS.Timeout | undefined;
 
@@ -80,9 +45,6 @@ export function EditPopover({ setTooltip, selectedText, user, ...props }: EditPo
       }, 750);
 
       const payload = { content: selectString, improvement };
-      if (lnPayment) {
-        Object.assign(payload, { lnPayment });
-      }
       const newValue = await generateEdit(payload);
 
       clearInterval(loadingInterval);
@@ -104,25 +66,14 @@ export function EditPopover({ setTooltip, selectedText, user, ...props }: EditPo
   };
 
   const handleClick = async (value: string) => {
-    if (!userInfo?.credits && !userInfo?.hasPaid && !user.isUsingLn) {
+    if (!userInfo?.credits && !userInfo?.hasPaid) {
       onPayOpen();
       setTooltip(null);
       window.getSelection()?.removeAllRanges();
       return;
     }
 
-    let lnPayment: LnPayment | null = null;
-    if (userInfo?.isUsingLn) {
-      if (userInfo.credits > 0) {
-        onPayOpen();
-      }
-      try {
-        lnPayment = await checkIfLnAndPay(user);
-      } catch (error) {
-        console.error('error paying with ln: ', error);
-      }
-    }
-    replaceSelectedText({ improvement: value, lnPayment });
+    replaceSelectedText({ improvement: value });
     window.getSelection()?.removeAllRanges();
   };
 
@@ -157,9 +108,7 @@ export function EditPopover({ setTooltip, selectedText, user, ...props }: EditPo
         onOpen={onPayOpen}
         onClose={onPayClose}
         credits={userInfo?.credits || 0}
-        isUsingLn={user?.isUsingLn || false}
       />
-      <LnPaymentModal isOpen={lnPaymentIsOpen} onClose={lnPaymentOnClose} lightningInvoice={lightningInvoice} />
     </>
   );
 }

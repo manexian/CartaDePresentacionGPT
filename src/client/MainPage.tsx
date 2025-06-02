@@ -1,4 +1,4 @@
-import { type User, type LnPayment } from "wasp/entities";
+import { type User } from "wasp/entities";
 import { useAuth } from "wasp/client/auth";
 import { translations } from './translations';
 
@@ -6,10 +6,8 @@ import {
   generateCoverLetter,
   createJob,
   updateCoverLetter,
-  updateLnPayment,
   useQuery,
   getJob,
-  getCoverLetterCount,
 } from "wasp/client/operations";
 
 import {
@@ -45,9 +43,6 @@ import { useState, useEffect, useRef } from 'react';
 import { ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import LnPaymentModal from './components/LnPaymentModal';
-import { fetchLightningInvoice } from './lightningUtils';
-import type { LightningInvoice } from './lightningUtils';
 
 function MainPage() {
   const [isPdfReady, setIsPdfReady] = useState<boolean>(false);
@@ -56,10 +51,8 @@ function MainPage() {
   const [isCompleteCoverLetter, setIsCompleteCoverLetter] = useState<boolean>(true);
   const [sliderValue, setSliderValue] = useState(30);
   const [showTooltip, setShowTooltip] = useState(false);
-  const [lightningInvoice, setLightningInvoice] = useState<LightningInvoice | null>(null);
 
   const { data: user } = useAuth();
-
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const jobIdParam = urlParams.get('job');
@@ -69,8 +62,6 @@ function MainPage() {
     isLoading: isJobLoading,
     error: getJobError,
   } = useQuery(getJob, { id: jobToFetch }, { enabled: jobToFetch.length > 0 });
-
-  const { data: coverLetterCount } = useQuery(getCoverLetterCount);
 
   const {
     handleSubmit,
@@ -83,7 +74,6 @@ function MainPage() {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: loginIsOpen, onOpen: loginOnOpen, onClose: loginOnClose } = useDisclosure();
-  const { isOpen: lnPaymentIsOpen, onOpen: lnPaymentOnOpen, onClose: lnPaymentOnClose } = useDisclosure();
 
   let setLoadingTextTimeout: ReturnType<typeof setTimeout>;
   const loadingTextRef = useRef<HTMLDivElement>(null);
@@ -177,37 +167,6 @@ function MainPage() {
     }
   }
 
-  async function checkIfLnAndPay(user: Omit<User, 'password'>): Promise<LnPayment | null> {
-    try {
-      if (user.isUsingLn && user.credits === 0) {
-        const invoice = await fetchLightningInvoice();
-        let lnPayment: LnPayment;
-        if (invoice) {
-          invoice.status = 'pending';
-          lnPayment = await updateLnPayment(invoice);
-          setLightningInvoice(invoice);
-          lnPaymentOnOpen();
-        } else {
-          throw new Error('fetching lightning invoice failed');
-        }
-  
-        let status = invoice.status;
-        while (status === 'pending') {
-          lnPayment = await updateLnPayment(invoice);
-          status = lnPayment.status;
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-        if (status !== 'success') {
-          throw new Error('payment failed');
-        }
-        return lnPayment;
-      } 
-    } catch (error) {
-      console.error('Error processing payment, please try again');
-    }
-    return null;
-  }
-
   function checkIfSubPastDueAndRedirect(user: Omit<User, 'password'>) {
     if (user.subscriptionStatus === 'past_due') {
       navigate('/profile')
@@ -229,8 +188,6 @@ function MainPage() {
     }
 
     try {
-      const lnPayment = await checkIfLnAndPay(user);
-
       const isSubscriptionPastDue = checkIfSubPastDueAndRedirect(user);
       if (isSubscriptionPastDue) return;
 
@@ -246,8 +203,7 @@ function MainPage() {
         isCompleteCoverLetter,
         includeWittyRemark: values.includeWittyRemark,
         temperature: creativityValue,
-        gptModel: values.gptModel || 'gpt-4o-mini',
-        lnPayment: lnPayment || undefined,
+        gptModel: values.gptModel || 'gpt-4o-mini'
       };
 
       setLoadingText();
@@ -274,8 +230,6 @@ function MainPage() {
     }
 
     try {
-      const lnPayment = await checkIfLnAndPay(user);
-
       const isSubscriptionPastDue = checkIfSubPastDueAndRedirect(user);
       if (isSubscriptionPastDue) return;
 
@@ -291,8 +245,7 @@ function MainPage() {
         isCompleteCoverLetter,
         temperature: creativityValue,
         includeWittyRemark: values.includeWittyRemark,
-        gptModel: values.gptModel || 'gpt-4o-mini',
-        lnPayment: lnPayment || undefined,
+        gptModel: values.gptModel || 'gpt-4o-mini'
       };
 
       setLoadingText();
@@ -328,13 +281,7 @@ function MainPage() {
 
   function hasUserPaidOrActiveTrial(): Boolean {
     if (user) {
-      if (user.isUsingLn) {
-        if (user.credits < 3 && user.credits > 0) {
-          onOpen();
-        }
-        return true;
-      }
-      if (!user.hasPaid && !user.isUsingLn && user.credits > 0) {
+      if (!user.hasPaid && user.credits > 0) {
         if (user.credits < 3) {
           onOpen();
         }
@@ -355,19 +302,6 @@ function MainPage() {
 
   return (
     <>
-      <Box
-        layerStyle='card'
-        px={4}
-        py={2}
-        mt={3}
-        mb={-3}
-        bgColor='bg-overlay'
-        visibility={!coverLetterCount ? 'hidden' : 'visible'}
-        _hover={{ bgColor: 'bg-contrast-xs' }}
-        transition='0.1s ease-in-out'
-      >
-        <Text fontSize='md'>{translations.coverLettersGenerated.replace('{{count}}', coverLetterCount?.toLocaleString() || '0')}</Text>
-      </Box>
       <BorderBox>
         <form
           onSubmit={!isCoverLetterUpdate ? handleSubmit(onSubmit) : handleSubmit(onUpdate)}
@@ -635,12 +569,9 @@ function MainPage() {
         onOpen={onOpen}
         onClose={onClose}
         credits={user?.credits || 0}
-        isUsingLn={user?.isUsingLn || false}
       />
       <LoginToBegin isOpen={loginIsOpen} onOpen={loginOnOpen} onClose={loginOnClose} />
-      <LnPaymentModal isOpen={lnPaymentIsOpen} onClose={lnPaymentOnClose} lightningInvoice={lightningInvoice} />
     </>
   );
 }
-
 export default MainPage;
