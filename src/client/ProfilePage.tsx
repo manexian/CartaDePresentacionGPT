@@ -24,6 +24,7 @@ export default function Profile() {
   const [isGpt4Loading, setIsGpt4Loading] = useState<boolean>(false);
   const [isCreditsLoading, setIsCreditsLoading] = useState<boolean>(false);
 
+
   const handlePayment = async () => {
     setIsLoading(true);
     try {
@@ -41,6 +42,7 @@ export default function Profile() {
     try {
       const { sessionUrl } = await stripeGpt4Payment();
       if (sessionUrl) window.location.href = sessionUrl;
+
     } catch (error: any) {
       console.error(error);
       alert(error?.message ?? 'Something went wrong');
@@ -83,6 +85,7 @@ export default function Profile() {
   }
 
   return (
+    
     <BorderBox>
       <VStack alignItems='flex-start' gap={3}>
         <Heading size='md'>Profile</Heading>
@@ -109,7 +112,7 @@ export default function Profile() {
             </FormControl>
           </>
         )}
-        {(userInfo.gptModel === 'gpt-4' || userInfo.gptModel === 'gpt-4o') && (
+        {userInfo.hasGpt4Access && (
           <FormControl>
             <FormLabel>GPT Model</FormLabel>
             <RadioGroup defaultValue={userInfo.gptModel} onChange={handleGptModelChange}>
@@ -126,7 +129,7 @@ export default function Profile() {
               💰 Subscribe for $2.95/mo
             </Button>
           )}
-          {userInfo.gptModel !== 'gpt-4' && userInfo.gptModel !== 'gpt-4o' && (
+          {!userInfo.hasGpt4Access && (
             <Button isLoading={isGpt4Loading} onClick={handleGpt4Payment}>
               🧠 Upgrade to GPT-4 for $4.95/mo
             </Button>

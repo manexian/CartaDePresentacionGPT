@@ -38,6 +38,7 @@ export const stripeWebhook: StripeWebhook = async (request, response, context) =
             hasPaid: true,
             gptModel: 'gpt-4o',
             datePaid: new Date(),
+            hasGpt4Access: true,
           },
         });
       } else if (line_items?.data[0]?.price?.id === process.env.PRODUCT_PRICE_ID) {
@@ -50,6 +51,7 @@ export const stripeWebhook: StripeWebhook = async (request, response, context) =
             hasPaid: true,
             datePaid: new Date(),
             gptModel: 'gpt-4o-mini',
+            hasGpt4Access: false,
           },
         });
       } else if (line_items?.data[0]?.price?.id === process.env.PRODUCT_CREDITS_PRICE_ID) {
@@ -63,6 +65,7 @@ export const stripeWebhook: StripeWebhook = async (request, response, context) =
               increment: 10,
             },
             gptModel: 'gpt-4o-mini',
+            hasGpt4Access: false,
           },
         });
       }
@@ -161,6 +164,7 @@ export const stripeWebhook: StripeWebhook = async (request, response, context) =
         data: {
           hasPaid: false,
           subscriptionStatus: 'ended',
+          hasGpt4Access: false,
         },
       });
     } else {

@@ -12,6 +12,7 @@ model User {
   username             String        @unique
   email                String?
   hasPaid              Boolean       @default(false)
+  hasGpt4Access        Boolean       @default(false)
   gptModel             String        @default("gpt-4o-mini")
   datePaid             DateTime?
   stripeId             String?

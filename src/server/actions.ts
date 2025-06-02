@@ -398,6 +398,7 @@ export const updateUser: UpdateUser<UpdateUserArgs, UserWithoutPassword> = async
       email: true,
       username: true,
       hasPaid: true,
+      hasGpt4Access: true,
       datePaid: true,
       notifyPaymentExpires: true,
       checkoutSessionId: true,
